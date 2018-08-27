@@ -33,7 +33,7 @@
 
 Edit the application.properties file to look like this:
 ```
-spring.datasource.url=jdbc:h2:mem:testdb
+spring.datasource.url=jdbc:h2:mem:exampledb
 spring.h2.console.enabled=true
 spring.h2.console.path=/h2-console
 spring.jpa.hibernate.ddl-auto=create
@@ -340,8 +340,10 @@ public class Role {
 	    @Autowired
 	    RoleRepository roleRepository;
 
-	    @Autowired
-	    private PasswordEncoder passwordEncoder;
+	    @Bean
+            public PasswordEncoder encoder() {
+                return new BCryptPasswordEncoder();
+            }
 
 	    @Autowired
 	    public UserService(UserRepository userRepository) {
@@ -359,14 +361,14 @@ public class Role {
 	    public void saveUser(User user) {
 	        user.setRoles(Arrays.asList(roleRepository.findByRole("USER")));
 	        user.setEnabled(true);
-	        user.setPassword(passwordEncoder.encode(user.getPassword()));
+	        user.setPassword(encoder().encode(user.getPassword()));
 	        userRepository.save(user);
 	    }
 
 	    public void saveAdmin(User user) {
 	        user.setRoles(Arrays.asList(roleRepository.findByRole("ADMIN")));
 	        user.setEnabled(true);
-	        user.setPassword(passwordEncoder.encode(user.getPassword()));
+	        user.setPassword(encoder().encode(user.getPassword()));
 	        userRepository.save(user);
 	    }
 	}
@@ -395,8 +397,10 @@ public class Role {
 	    @Autowired
 	    RoleRepository roleRepository;
 
-	    @Autowired
-	    private PasswordEncoder passwordEncoder;
+	    @Bean
+        public PasswordEncoder encoder() {
+            return new BCryptPasswordEncoder();  
+        }
 
 	    /*
 	        Run method will be executed after the application context is
@@ -413,16 +417,19 @@ public class Role {
 	        Role userRole = roleRepository.findByRole("USER");
 	        Role adminRole = roleRepository.findByRole("ADMIN");
 
-	        User user = new User("bob@bob.com",passwordEncoder.encode("password"),"Bob","Bobberson",true,"bob");
+	        User user = new User("bob@bob.com",encoder().encode("password"),
+	        "Bob",
+	        "Bobberson",true,"bob");
 	        user.setRoles(Arrays.asList(userRole));
 	        userRepository.save(user);
 
-	        user = new User("admin@adm.com",passwordEncoder.encode("password"),"Admin","User",true,"admin");
+	        user = new User("admin@adm.com",encoder().encode("password"),"Admin",
+	        "User",true,"admin");
 	        user.setRoles(Arrays.asList(adminRole));
 	        userRepository.save(user);
 	    }
 	}
-		```
+	```
 
 18. **Create the Controller**
     * Name it HomeController.java
@@ -488,8 +495,8 @@ public class Role {
 	<html lang="en" xmlns:th="www.thymeleaf.org" xmlns:sec="www.thymeleaf.org/extras/spring-security">
 	<head th:fragment="header">
 	    <meta charset="UTF-8" />
-	    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}" type="text/css" />
-	    <link rel="stylesheet" th:href="@{/css/style.css}" type="text/css" /> <!--custom stylesheet-->
+	    <link rel="stylesheet" href="/css/bootstrap.min.css" type="text/css" />
+	    <link rel="stylesheet" href="/css/style.css" type="text/css" /> <!--custom stylesheet-->
 	</head>
 	<body>
 

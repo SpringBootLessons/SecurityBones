@@ -1,8 +1,10 @@
 package com.example.demo;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -16,8 +18,10 @@ public class UserService {
     @Autowired
     RoleRepository roleRepository;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    @Bean
+    public PasswordEncoder encoder() {
+        return new BCryptPasswordEncoder();
+    }
 
     @Autowired
     public UserService(UserRepository userRepository) {
@@ -35,14 +39,14 @@ public class UserService {
     public void saveUser(User user) {
         user.setRoles(Arrays.asList(roleRepository.findByRole("USER")));
         user.setEnabled(true);
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setPassword(encoder().encode(user.getPassword()));
         userRepository.save(user);
     }
 
     public void saveAdmin(User user) {
         user.setRoles(Arrays.asList(roleRepository.findByRole("ADMIN")));
         user.setEnabled(true);
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setPassword(encoder().encode(user.getPassword()));
         userRepository.save(user);
     }
 
